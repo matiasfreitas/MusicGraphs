@@ -46,7 +46,6 @@ data = pd.read_csv(CsvName, encoding='utf_8', engine='python',
 
 data = data.reindex(data.sum().sort_values().index, axis=1)
 data = data.iloc[:, ::-1]
-
 for word in StopWordsEN:
   try:
     data = data.drop(columns=word)
