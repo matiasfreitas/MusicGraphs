@@ -2,7 +2,9 @@ import requests
 from bs4 import BeautifulSoup
 import pandas as pd
 from collections import Counter
-            
+
+LinkList = [ "https://www.letras.mus.br/ed-sheeran/"]
+
 def request1MusicPage(link):
     try:
         page = requests.get(link)
@@ -45,6 +47,16 @@ def requestMusic(content):
         music = music.replace('”', " ")
         music = music.replace("]", " ")
         music = music.replace("[", " ")
+        music = music.replace("method", " ")
+        music = music.replace("bound", " ")
+        music = music.replace("tag", " ")
+        music = music.replace("get_text", " ")
+        music = music.replace("class=", " ")
+        music = music.replace("cnt-letra", " ")
+        music = music.replace("p402_premium", " ")
+        
+        
+
 
     else:
         music = ""
@@ -104,7 +116,7 @@ def TreatmentMusic(stringMusic):
     return Counter(listWord)
 
 
-LinkList = [ "https://www.letras.mus.br/michael-jackson/"]
+
 AllArtistUniqueWords = []
 AllSingers = []
 totalDicts= {}

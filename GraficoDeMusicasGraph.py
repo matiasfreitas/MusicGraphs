@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import scipy as sp
 from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
-from plotly.graph_objs import *
+import plotly.graph_objs as go
 
 StopWordsPT = ["de" , "a" , "o" , "que" , "e" , "do" , "da" , "em" , "um" , "para" , "é" , "com" , "não" , "uma" , "os" , "no" , 
                     "se" , "na" , "por" , "mais" , "as" , "dos" , "como" , "mas" , "foi" , "ao" , "ele" , "das" , "tem" , "à" , "seu" , 
@@ -37,46 +37,53 @@ StopWordsEN = ['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you
                 "mightn't", 'mustn', "mustn't", 'needn', "needn't", 'shan', "shan't", 'shouldn', "shouldn't", 'wasn', "wasn't", 'weren', 
                 "weren't", 'won', "won't", 'wouldn', "wouldn't"]
 
-CsvName = "Michael Jackson.csv"
-HtmlName = "Michael Jackson Words Frequencies.html"
-color = ["yellow", "blue", "red", "green"]
-data = pd.read_csv(CsvName, encoding='utf_8', engine='python',
+Artists = ["Ed Sheeran", "Michael Jackson", "The Beatles", "Miley Cyrus"]
+Colors = "rgb(200, 0, 0)", "rgb(0, 200, 0)", "rgb(0, 0, 200)","rgb(200, 200, 200)"
+
+def TakeAndModifyData(artist):
+  CsvName = artist + ".csv"
+  data = pd.read_csv(CsvName, encoding='utf_8', engine='python',
                     index_col=["Songs"]) 
-
-
-data = data.reindex(data.sum().sort_values().index, axis=1)
-data = data.iloc[:, ::-1]
-for word in StopWordsEN:
-  try:
-    data = data.drop(columns=word)
-  except:
-    pass
-
-AxisY = []
-for column in data.columns:
+  data = data.reindex(data.sum().sort_values().index, axis=1)
+  data = data.iloc[:, ::-1]
+  for word in StopWordsEN:
+    try:
+      data = data.drop(columns=word)
+    except:
+      pass
+  AxisY = []
+  for column in data.columns:
     if data[column].sum()>0:
         AxisY.append(data[column].sum())
+  
+  return [data, AxisY]
+
+def TraceLine(data, AxisY, Artist, color):
+  trace = go.Scatter(
+    y = AxisY,
+    x =[word for word in range(0,len(data.columns))], 
+    name = "Words Frequencies in " + Artist  + " Songs",
+    mode = 'lines+markers',
+    text = [column for column in data.columns],
+    line = dict(  color = color,
+                  width = 4,
+                  dash = 'dot'))
+  return trace
 
 
-print(AxisY)
+Traces = []
+count = -1
+nameAllArtist = ""
+for artist in Artists:
+  count += 1
+  data = TakeAndModifyData(artist)
+  Traces.append(TraceLine(data[0],data[1], artist, Colors[count]))
+  nameAllArtist += artist + ", "
 
+nameAllArtist = nameAllArtist[:-2]
 
-
-
-trace1 = {
-    "y": AxisY,
-    "x":[word for word in range(0,len(data.columns))],
-    "line": {"shape": "linear"}, 
-    "marker": {"color": "rgb(164,194,244)"}, 
-    "mode": "lines+markers", 
-    "text": [column for column in data.columns],
-    "type": "scatter"
-}
-
-
-data = Data([trace1])
 layout = {
-  "title": "Words Frequencies in Michael Jackson Songs", 
+  "title": "Words Frequencies in " + nameAllArtist + " Songs", 
   "xaxis": {
     "showgrid": False, 
     "title": "Words"
@@ -86,9 +93,9 @@ layout = {
     "title": "Frequency"
   }
 }
-fig = Figure(data=data, layout=layout)
+fig = go.Figure(data=Traces, layout=layout)
 
-plot(fig, filename= HtmlName)
+plot(fig, filename= nameAllArtist + ".html")
 
 ### python GraficoDeMusicasGraph.py version 0.5
 
